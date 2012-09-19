@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def plot_GridComparison(grid1, grid2, title1, title2, filename='', comptype='abs'):
+def plot_GridComparison(grid1, grid2, title1, title2, Level_w, freq_w, filename='', comptype='abs'):
 
   # decide if plot to file or not
   if filename=='' : tofile = False
@@ -16,25 +16,26 @@ def plot_GridComparison(grid1, grid2, title1, title2, filename='', comptype='abs
     title_diff="% Rel difference"
   else:
     raise UserWarning('Invalid comptype %s'%comptype)
-
+    
+  extent = (freq_w[0],freq_w[-1],(nlevel*2)-0.5,-0.5)
+  nticks = nlevel*2
+  ticks = ["%.1f"%t for t in Level_w]
 
   # do plot
-  ax = plt.subplot(131)
-  plt.imshow(grid1,aspect='auto',interpolation='none')
-  plt.colorbar()
-  plt.title(title1)
+  for i, gr in enumerate([('grid1',title1),('grid2',title2),('grid_diff',title_diff)]):
+      if i == 0:  ax = plt.subplot(1,3,i+1)
+      else: plt.subplot(1,3,i+1,sharex=ax,sharey=ax)
+      plt.imshow(eval(gr[0]),aspect='auto',extent=extent,interpolation='none')
+      plt.colorbar()
+      plt.yticks(np.arange(nticks+1),ticks)
+      plt.title(gr[1])
+      plt.ylim(extent[-2],extent[-1])
+      plt.xlim(extent[0],extent[1])
+      plt.grid(True)
+      plt.ylabel("Level")
+      plt.xlabel("Frequency (Hz)")
 
-  plt.subplot(132,sharex=ax,sharey=ax)
-  plt.imshow(grid2,aspect='auto',interpolation='none')
-  plt.colorbar()
-  plt.title(title2)
-
-  plt.subplot(133,sharex=ax,sharey=ax)
-  plt.imshow(grid_diff,aspect='auto',interpolation='none')
-  plt.colorbar()
-  plt.title(title_diff)
-
-
+  
   # plot to file or screen
   if tofile : plt.savefig(filename)
   else: plt.show()
@@ -54,5 +55,4 @@ if __name__=='__main__':
 
   #loading and comparing with matlab:
   matlab = np.fromfile('test_data/matlab_grid.np').reshape(16,768)
-  plot_GridComparison(matlab,grid,'Matlab','Python',comptype='rel')
-
+  plot_GridComparison(matlab,grid,'Matlab','Python',Level_w, freq_w,comptype='rel')
