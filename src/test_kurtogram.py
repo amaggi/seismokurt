@@ -60,18 +60,24 @@ class KurtogramTests(unittest.TestCase):
 
     c_dict=loadmat("test_data/c.mat")
     c_exp = c_dict['c']
+
+    S_dict=loadmat("test_data/S.mat")
+    S_exp = S_dict['S']
    
     # get bw and frequency (Hz)
     bw_hz, fc_hz, fi = getBandwidthAndFrequency(self.nlevel,self.Fs, self.level_w, self.freq_w, level_index, freq_index)
 
     # get basic filter parameters
     h, g, h1, h2, h3 = get_h_parameters(N, fcut)
-    c,Bw,fc = Find_wav_kurt(self.x,h,g,h1,h2,h3,self.nlevel,lev,fi,'kurt2',self.Fs)
+    c,Bw,fc = Find_wav_kurt(self.x,h,g,h1,h2,h3,self.nlevel,lev,fi,self.Fs)
+   
+    S=getFTSquaredEnvelope(c)
 
     # do tests
     self.assertAlmostEqual(Bw*self.Fs,bw_hz)
     self.assertAlmostEqual(fc*self.Fs,fc_hz)
     np.testing.assert_allclose(c.flatten(),c_exp.flatten(),atol=1e-3)
+    np.testing.assert_allclose(S.flatten(),S_exp.flatten(),atol=1e-6)
  
 
 if __name__ == '__main__':
