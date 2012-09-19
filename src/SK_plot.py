@@ -41,7 +41,7 @@ def plot_GridComparison(grid1, grid2, title1, title2, Level_w, freq_w, nlevel, f
   if tofile : plt.savefig(filename)
   else: plt.show()
 
-def plot_Grid(grid,Level_w,freq_w,title=None):
+def plot_Grid(grid,Level_w,freq_w,nlevel,title=None):
   extent = (freq_w[0],freq_w[-1],(nlevel*2)-0.5,-0.5)
   nticks = nlevel*2
   ticks = ["%.1f"%t for t in Level_w]
