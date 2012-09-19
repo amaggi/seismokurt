@@ -11,14 +11,14 @@ def nextpow2(n):
     m_i = np.ceil(m_f)
     return 2**m_i
 
-def get_h_parameters(N, fc):
-    """N : len(x)
-    Fc: some filter stuff??"""
-    h = si.firwin(N+1,fc) * np.exp(2*1j*np.pi*np.arange(N+1)*0.125)
+def get_h_parameters(N, fcut):
+    """N = length of the FIR filter (number of values + 1)
+    fcut: cutoff as a fraction of Nyquist"""
+    h = si.firwin(N+1,fcut) * np.exp(2*1j*np.pi*np.arange(N+1)*0.125)
     n = np.arange(2,N+2)
     g = h[(1-n)%N]*(-1)**(1-n)
     N = np.fix((3./2.*N))
-    h1 = si.firwin(N+1,2./3*fc)*np.exp(2j*np.pi*np.arange(N+1)*0.25/3.)
+    h1 = si.firwin(N+1,2./3*fcut)*np.exp(2j*np.pi*np.arange(N+1)*0.25/3.)
     h2 = h1*np.exp(2j*np.pi*np.arange(N+1)/6.)
     h3 = h1*np.exp(2j*np.pi*np.arange(N+1)/3.)  
     return (h, g, h1, h2, h3)
@@ -72,7 +72,7 @@ def Fast_Kurtogram(x, nlevel, Fs=1, opt1=None, opt2=None):
         #~ else:
             #~ Kwav = K_wpQ(x,h,g,h1,h2,h3,nlevel,'kurt1')				# variance of the envelope magnitude
 
-        print "Kwav.shape", Kwav.shape
+        #print "Kwav.shape", Kwav.shape
         #~ print "Kwav",Kwav
         
         # keep positive values only!
@@ -130,7 +130,7 @@ def K_wpQ(x,h,g,h1,h2,h3,nlevel,opt,level=0):
     return K
 
 def K_wpQ_local(x,h,g,h1,h2,h3,nlevel,opt,level):
-    print "LEVEL", level
+    #print "LEVEL", level
     #~ print "*" * level
     a,d = DBFB(x,h,g)
     

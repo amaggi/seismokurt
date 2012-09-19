@@ -10,6 +10,18 @@ from obspy.signal import bandpass, envelope, highpass, lowpass
 
 from SK_grid import *
 
+
+def getBandwidthAndFrequency(nlevel, Fs, level_w, freq_w, level_index, freq_index):
+
+  f1 = freq_w[freq_index]
+  l1 = level_w[level_index]
+  fi = (freq_index)/3./2**(nlevel+1)
+  fi += 2.**(-2-l1)
+  bw = Fs * 2 **-(l1) /2
+  fc = Fs * fi
+ 
+  return bw, fc, fi
+
 def binary(i,k):
     # return the coefficients of the binary expansion of i:
     # i = a(1)*2^(k-1) + a(2)*2^(k-2) + ... + a(k)
@@ -70,6 +82,7 @@ def Find_wav_kurt(x,h,g,h1,h2,h3,nlevel,Sc,Fr,opt,Fs=1):
     # -------------------
     level = np.fix((Sc))+ ((Sc%1) >= 0.5) * (np.log2(3)-1)
     Bw = 2**(-level-1)
+    bw = Fs * Bw
     freq_w = np.arange(0,2**(level-1)) / 2**(level+1) + Bw/2.
     J = np.argmin(np.abs(freq_w-Fr))
     fc = freq_w[J]
@@ -105,6 +118,7 @@ def Find_wav_kurt(x,h,g,h1,h2,h3,nlevel,Sc,Fr,opt,Fs=1):
 
     Fr *= Fs 
     print Fr, Fs, bw, Bw
+    #print Fr, Fs, Bw
     filt = highpass(x,Fr-bw/2, Fs, corners=2)
     filt = lowpass(filt,Fr+bw/2, Fs, corners=2)
     filt /= np.max(filt)
@@ -158,7 +172,7 @@ def Find_wav_kurt(x,h,g,h1,h2,h3,nlevel,Sc,Fr,opt,Fs=1):
         plt.xlabel('frequency [Hz]')
         plt.grid(True)
     plt.show()
-    return [c,Bw,fc]
+    return c,Bw,fc
 
 if __name__ == "__main__":
     
@@ -205,15 +219,4 @@ if __name__ == "__main__":
         test = 0
 
 
-import numpy as np
-
-def getBandwidthAndFrequency(nlevel, Fs, level_w, freq_w, level_index, freq_index):
-
-  f1 = freq_w[freq_index]
-  l1 = level_w[level_index]
-  fi = (freq_index)/3./2**(nlevel+1)
-  fi += 2.**(-2-l1)
-  bw = Fs * 2 **-(l1) /2
-  fc = Fs * fi
- 
-  return bw, fc
+    print Bw, fc
