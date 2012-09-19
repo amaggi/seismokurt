@@ -10,7 +10,21 @@ def nextpow2(n):
     m_f = np.log2(n)
     m_i = np.ceil(m_f)
     return 2**m_i
+
+def get_h_parameters(N, fc):
+    """N : len(x)
+    Fc: some filter stuff??"""
+    h = si.firwin(N+1,fc) * np.exp(2*1j*np.pi*np.arange(N+1)*0.125)
+    n = np.arange(2,N+2)
+    g = h[(1-n)%N]*(-1)**(1-n)
+    N = np.fix((3./2.*N))
+    h1 = si.firwin(N+1,2./3*fc)*np.exp(2j*np.pi*np.arange(N+1)*0.25/3.)
+    h2 = h1*np.exp(2j*np.pi*np.arange(N+1)/6.)
+    h3 = h1*np.exp(2j*np.pi*np.arange(N+1)/3.)  
+    return (h, g, h1, h2, h3)
+
     
+
 def Fast_Kurtogram(x, nlevel, Fs=1, opt1=None, opt2=None):
     # Fast_Kurtogram(x,nlevel,Fs)
     # Computes the fast kurtogram of signal x up to level 'nlevel'
@@ -50,17 +64,8 @@ def Fast_Kurtogram(x, nlevel, Fs=1, opt1=None, opt2=None):
         # Analytic generating filters
         N = 16			
         fc = .4					# a short filter is just good enough!
-        h = si.firwin(N+1,fc) * np.exp(2*1j*np.pi*np.arange(N+1)*0.125)
-        n = np.arange(2,N+2)
-        #~ print n
-        g = h[(1-n)%N]*(-1)**(1-n)
-        N = np.fix((3./2.*N))
-        #~ print N
-        h1 = si.firwin(N+1,2./3*fc)*np.exp(2j*np.pi*np.arange(N+1)*0.25/3.)
-        #~ plt.plot(h1)
-        #~ plt.show()
-        h2 = h1*np.exp(2j*np.pi*np.arange(N+1)/6.)
-        h3 = h1*np.exp(2j*np.pi*np.arange(N+1)/3.)  
+        
+        h, g, h1, h2, h3 = get_h_parameters(N, fc)
         
         if opt2 == 1:
             Kwav = K_wpQ(x,h,g,h1,h2,h3,nlevel,'kurt2')				# kurtosis of the complex envelope
@@ -72,7 +77,7 @@ def Fast_Kurtogram(x, nlevel, Fs=1, opt1=None, opt2=None):
         
         # keep positive values only!
         Kwav[Kwav <= 0] = 0
-        fig = plt.figure()
+        
         #~ plt.subplot(ratio='auto')
         Level_w = np.arange(1,nlevel+1)
         Level_w = np.array([Level_w, Level_w + np.log2(3.)-1])
@@ -354,44 +359,11 @@ def  K_wpQ_filt_local(x,h,g,h1,h2,h3,acoeff,bcoeff,level):
     #~ print 'c.shape', c.shape
     return c
 
-def raylinv(p,b):
-    #RAYLINV  Inverse of the Rayleigh cumulative distribution function (cdf).
-    #   X = RAYLINV(P,B) returns the Rayleigh cumulative distribution 
-    #   function with parameter B at the probabilities in P.
-
-    #~ if nargin <  1: 
-        #~ logging.error('Requires at least one input argument.') 
-
-    # Initialize x to zero.
-    x = np.zeros(len(p))
-    # Return NaN if the arguments are outside their respective limits.
-    k = np.where(((b <= 0)| (p < 0)| (p > 1)))[0]
-    
-    if len(k) != 0: 
-        tmp  = np.NaN
-        x[k1] = tmp(len(k))
-
-    # Put in the correct values when P is 1.
-    k = np.where(p == 1)[0]
-    #~ print k
-    if len(k)!=0:
-        tmp  = Inf
-        x[k] = tmp(len(k))
-
-    k = np.where(((b > 0) & (p > 0) & (p < 1)))[0]
-    #~ print k
-    
-    if len(k)!=0:
-        pk = p[k]
-        bk = b[k]
-        #~ print pk, bk
-        x[k] = np.sqrt((-2*bk ** 2) * np.log(1 - pk))
-    return x
 
 
 if __name__ == "__main__":
     from scipy.io.matlab import loadmat
-    v1 = loadmat("VOIE1.mat")
+    v1 = loadmat("test_data/VOIE1.mat")
     x = v1['v1']
     Fs = 100
     
