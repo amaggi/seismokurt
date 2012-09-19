@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from obspy.signal import bandpass, envelope, highpass, lowpass
 
-def plot_GridComparison(grid1, grid2, title1, title2, Level_w, freq_w, filename='', comptype='abs'):
+def plot_GridComparison(grid1, grid2, title1, title2, Level_w, freq_w, nlevel, filename='', comptype='abs'):
 
   # decide if plot to file or not
   if filename=='' : tofile = False
@@ -119,7 +119,7 @@ if __name__=='__main__':
 
   #loading and comparing with matlab:
   matlab = np.fromfile('test_data/matlab_grid.np').reshape(16,768)
-  plot_GridComparison(matlab,grid,'Matlab','Python',Level_w, freq_w,comptype='rel')
+  plot_GridComparison(matlab,grid,'Matlab','Python',Level_w, freq_w, nlevel,comptype='rel')
 
   from SK_process import Find_wav_kurt, raylinv
   N=32
