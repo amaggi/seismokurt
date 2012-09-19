@@ -130,7 +130,7 @@ def K_wpQ(x,h,g,h1,h2,h3,nlevel,opt,level=0):
     return K
 
 def K_wpQ_local(x,h,g,h1,h2,h3,nlevel,opt,level):
-    print "LEVEL", level
+    #~ print "LEVEL", level
     #~ print "*" * level
     a,d = DBFB(x,h,g)
     
@@ -368,28 +368,18 @@ if __name__ == "__main__":
     Fs = 100
     
     #~ from obspy.core import read
-    #~ st = read(os.path.join(r'C:\Users\thomas\Desktop\3069','*.UCC.DOU..HHZ.D.MSEED'))
-    #~ st.plot()
+    #~ st = read(os.path.join(r'C:\Users\thomas\Desktop\3169','*.UCC.OT4..HHZ.D.MSEED'))
     #~ st.merge()
-    
-    
-    #~ Fs = st[0].stats.sampling_rate
-    
-    #~ x = st[0].data[400*Fs:720*Fs]
     #~ x = st[0].data
+    #~ Fs = st[0].stats.sampling_rate
+
     nlevel= 8
     grid, Level_w, freq_w = Fast_Kurtogram(x, nlevel, Fs)
-    
-    #~ extent = (freq_w[0],freq_w[-1],Level_w[0],Level_w[-1])
-    extent = (freq_w[0],freq_w[-1],(nlevel*2)+0.5,-0.5)
+
+    extent = (freq_w[0],freq_w[-1],(nlevel*2)-0.5,-0.5)
     
     plt.imshow(np.sqrt(grid),aspect='auto',extent=extent,interpolation='none',origin="upper")
     
-    plt.ylim(extent[-2],extent[-1])
-    nticks = nlevel*2+1
-    ticks = np.linspace(0,nlevel,nticks)
-    ticks[1::2] += 0.1
-    plt.yticks(np.arange(nticks),ticks)
     
     index = np.argmax(grid)
     M = np.amax(grid)
@@ -407,6 +397,9 @@ if __name__ == "__main__":
     print "fc =",fc
     
     plt.colorbar()
-    plt.scatter([fc,],[l1,],marker=(5,1),c="yellow",s=100)
+    plt.scatter([fc,],np.where(Level_w == l1)[0],marker=(5,1),c="yellow",s=100)
+    plt.ylim(extent[-2],extent[-1])
+    plt.xlim(extent[0],extent[1])
+    plt.grid()
     plt.show()
     #~ grid.tofile('grid.np')
