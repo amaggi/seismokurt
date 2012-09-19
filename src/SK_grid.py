@@ -68,6 +68,8 @@ def Fast_Kurtogram(x, nlevel, Fs=1, opt1=None, opt2=None):
             #~ Kwav = K_wpQ(x,h,g,h1,h2,h3,nlevel,'kurt1')				# variance of the envelope magnitude
 
         print "Kwav.shape", Kwav.shape
+        #~ print "Kwav",Kwav
+        
         # keep positive values only!
         Kwav[Kwav <= 0] = 0
         fig = plt.figure()
@@ -76,12 +78,13 @@ def Fast_Kurtogram(x, nlevel, Fs=1, opt1=None, opt2=None):
         Level_w = np.array([Level_w, Level_w + np.log2(3.)-1])
         Level_w = sorted(Level_w.ravel())
         Level_w = np.append(0,Level_w[0:2*nlevel-1])
+
         freq_w = Fs*(np.arange(0,3*2.0**nlevel-1+1))/(3*2**(nlevel+1)) + 1.0/(3.*2.**(2+nlevel))
         #~ plt.imshow(Kwav,aspect='auto',extent=(freq_w[0],freq_w[-1],Level_w[0],Level_w[-1]),interpolation='none')
         grid = Kwav
-        extent = (freq_w[0],freq_w[-1],-Level_w[-1],-Level_w[0])
         
-        return grid, extent
+        
+        return grid, Level_w, freq_w
         
         
     else:
@@ -111,27 +114,26 @@ def K_wpQ(x,h,g,h1,h2,h3,nlevel,opt,level=0):
     KD, KQ = K_wpQ_local(x,h,g,h1,h2,h3,nlevel,opt,level)
     K = np.zeros((2*nlevel,3*2**nlevel))
     #~ print "******************************************************"
-    #~ print KD.shape, KQ.shape, K.shape
-    #~ K = KD
+    K[0,:] = KD[0,:]
     for i in range(nlevel-1):
-        #~ print K[2*i,:].shape
-        K[2*i,:] = KD[i+1,:]
-        #~ print K[2*i+1,:].shape
-        K[2*i+1,:] = KQ[i,:]
-       
-
+        K[2*i+1,:] = KD[i+1,:]
+        K[2*i+2,:] = KQ[i,:]
+      
     K[2*nlevel-1,:] = KD[nlevel,:]
+    
     #~ print "K Final Shape", K.shape
     return K
 
 def K_wpQ_local(x,h,g,h1,h2,h3,nlevel,opt,level):
     print "LEVEL", level
+    #~ print "*" * level
     a,d = DBFB(x,h,g)
     
     N = len(a)
     d = d*np.power(-1.,np.arange(1,N+1))
     K1 = kurt(a[len(h)-1:],opt)
     K2 = kurt(d[len(g)-1:],opt)
+
     if level > 2:
         a1,a2,a3 = TBFB(a,h1,h2,h3)
         d1,d2,d3 = TBFB(d,h1,h2,h3)
@@ -149,8 +151,7 @@ def K_wpQ_local(x,h,g,h1,h2,h3,nlevel,opt,level):
         Kd2 = 0
         Kd3 = 0
     
-    if level ==1:
-        #~ print "level = 1"
+    if level == 1:
         K =np.array([K1*np.ones(3),K2*np.ones(3)]).flatten()
         #~ print 'K.shape',K.shape
         KQ = np.array([Ka1,Ka2,Ka3,Kd1,Kd2,Kd3])
@@ -166,9 +167,8 @@ def K_wpQ_local(x,h,g,h1,h2,h3,nlevel,opt,level):
         K1 = K1*np.ones(np.max(Ka.shape))
         K2 = K2*np.ones(np.max(Kd.shape))
         K12 = np.append(K1,K2)
-        Kad = np.hstack((Ka, Kd))
-        #~ print ">", K12.shape, Kad.shape
-        K = np.vstack((K12,Kad))
+        Kad = np.hstack((Ka, Kd)) #good
+        K = np.vstack((K12,Kad)) # good
 
         Long = 2./6*np.max(KaQ.shape)
         Ka1 = Ka1*np.ones(Long)
@@ -181,7 +181,8 @@ def K_wpQ_local(x,h,g,h1,h2,h3,nlevel,opt,level):
         #~ print "HEEEERE"
         #~ print tmp.shape
         KQ = np.concatenate((Ka1,Ka2,Ka3,Kd1,Kd2,Kd3))
-        KQ = np.vstack((KQ, tmp))
+        KQ = np.vstack([KQ, tmp])
+        
         #~ if tmp.shape[0] != KQ.shape[0]:
             #~ tmp = tmp.T
         #~ for i in range(tmp.shape[0]):
@@ -195,7 +196,7 @@ def K_wpQ_local(x,h,g,h1,h2,h3,nlevel,opt,level):
         K1 = kurt(x,opt)
         K = np.vstack((K1*np.ones(np.max(K.shape)), K))
         #~ print "K shape", K.shape
-
+        
         a1,a2,a3 = TBFB(x,h1,h2,h3)
         Ka1 = kurt(a1[len(h)-1:],opt)
         Ka2 = kurt(a2[len(h)-1:],opt)
@@ -204,14 +205,15 @@ def K_wpQ_local(x,h,g,h1,h2,h3,nlevel,opt,level):
         Ka1 = Ka1*np.ones(Long)
         Ka2 = Ka2*np.ones(Long)
         Ka3 = Ka3*np.ones(Long)
-        print KQ.shape
         tmp = np.array(KQ[0:-2])
         #~ print "level==nlevel"
         
         KQ = np.concatenate((Ka1,Ka2,Ka3))
+        #~ KQ = np.vstack((tmp,KQ))
         KQ = np.vstack((KQ,tmp))
     
     #~ print "i'm leaving level=%i and K.shape="%level,K.shape, "and KQ.shape=",KQ.shape
+
     return K, KQ
 
 def kurt(x, opt):
@@ -225,7 +227,9 @@ def kurt(x, opt):
         if E < eps:
             K=0
             return K
+        
         K = np.mean(np.abs(x)**4)/E**2
+
         if np.all(np.isreal(x)):
             K = K - 3
         else:
@@ -246,12 +250,12 @@ def DBFB(x,h,g):
 
     # lowpass filter
     a = si.lfilter(h,1,x)
-    a = a[1::2]
+    a = a[1:N:2]
     a = a.ravel()
 
     # highpass filter
     d = si.lfilter(g,1,x)
-    d = d[1::2]
+    d = d[1:N:2]
     d = d.ravel()
     return (a,d)
 
@@ -266,17 +270,17 @@ def TBFB(x,h1,h2,h3):
 
     # lowpass filter
     a1 = si.lfilter(h1,1,x)
-    a1 = a1[2::3]
+    a1 = a1[2:N:3]
     a1 = a1.ravel()
 
     # passband filter
     a2 = si.lfilter(h2,1,x)
-    a2 = a2[2::3]
+    a2 = a2[2:N:3]
     a2 = a2.ravel()
 
     # highpass filter
     a3 = si.lfilter(h3,1,x)
-    a3 = a3[2::3]
+    a3 = a3[2:N:3]
     a3 = a3.ravel()
     return (a1,a2,a3)
 
@@ -386,31 +390,51 @@ def raylinv(p,b):
 
 
 if __name__ == "__main__":
-    #~ from scipy.io.matlab import loadmat
-    #~ v1 = loadmat(r"C:\Users\tlecocq\Documents\Tom's Share\Pack Kurtogram\Pack Kurtogram V3\VOIE1.mat")
-    #~ x = v1['v1']
+    from scipy.io.matlab import loadmat
+    v1 = loadmat("VOIE1.mat")
+    x = v1['v1']
+    Fs = 100
     
-    from obspy.core import read
-    st = read(os.path.join(r'C:\Users\thomas\Desktop\3069','*.UCC.DOU..HHZ.D.MSEED'))
+    #~ from obspy.core import read
+    #~ st = read(os.path.join(r'C:\Users\thomas\Desktop\3069','*.UCC.DOU..HHZ.D.MSEED'))
     #~ st.plot()
-    st.merge()
+    #~ st.merge()
     
     
-    Fs = st[0].stats.sampling_rate
-    x = st[0].data[400*Fs:720*Fs]
+    #~ Fs = st[0].stats.sampling_rate
+    
+    #~ x = st[0].data[400*Fs:720*Fs]
     #~ x = st[0].data
-    nlevel= 7
-    grid, extent = Fast_Kurtogram(x, nlevel, Fs)
+    nlevel= 8
+    grid, Level_w, freq_w = Fast_Kurtogram(x, nlevel, Fs)
     
-    plt.imshow(np.sqrt(grid),aspect='auto',extent=extent,interpolation='none')
-        
+    #~ extent = (freq_w[0],freq_w[-1],Level_w[0],Level_w[-1])
+    extent = (freq_w[0],freq_w[-1],(nlevel*2)+0.5,-0.5)
+    
+    plt.imshow(np.sqrt(grid),aspect='auto',extent=extent,interpolation='none',origin="upper")
+    
+    plt.ylim(extent[-2],extent[-1])
+    nticks = nlevel*2+1
+    ticks = np.linspace(0,nlevel,nticks)
+    ticks[1::2] += 0.1
+    plt.yticks(np.arange(nticks),ticks)
+    
     index = np.argmax(grid)
+    M = np.amax(grid)
     index = np.unravel_index(index,grid.shape)
-    #~ f1 = freq_w[index[1]]
-    #~ l1 = Level_w[index[0]]
-    #~ fi = (index[1])/3./2**(nlevel+1)
-    #~ fi += 2.**(-2-l1)
-    #~ print fi, l1,'(',index[0],')', Fs*fi
+    f1 = freq_w[index[1]]
+    l1 = Level_w[index[0]]
+    fi = (index[1])/3./2**(nlevel+1)
+    fi += 2.**(-2-l1)
+    bw = Fs * 2 **-(l1) /2
+    fc = Fs * fi
+    print "The maximum has be reached at:"
+    print "max =", M
+    print "level =",l1
+    print "bw =",bw
+    print "fc =",fc
+    
     plt.colorbar()
-    #~ plt.scatter([Fs*fi,],[nlevel-l1,],marker=(5,1),c="yellow",s=100)
+    plt.scatter([fc,],[l1,],marker=(5,1),c="yellow",s=100)
     plt.show()
+    #~ grid.tofile('grid.np')
