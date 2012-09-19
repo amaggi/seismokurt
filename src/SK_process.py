@@ -203,3 +203,17 @@ if __name__ == "__main__":
             #~ [c,Bw,fc] = Find_wav_kurt(x,h,g,h1,h2,h3,nlevel,lev,fi,'kurt1',Fs);
         #~ test = int(raw_input('Do you want to keep on filtering out transients (yes = 1 ; no = 0): '))
         test = 0
+
+
+import numpy as np
+
+def getBandwidthAndFrequency(nlevel, Fs, level_w, freq_w, level_index, freq_index):
+
+  f1 = freq_w[freq_index]
+  l1 = level_w[level_index]
+  fi = (freq_index)/3./2**(nlevel+1)
+  fi += 2.**(-2-l1)
+  bw = Fs * 2 **-(l1) /2
+  fc = Fs * fi
+ 
+  return bw, fc
