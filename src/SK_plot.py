@@ -41,6 +41,24 @@ def plot_GridComparison(grid1, grid2, title1, title2, Level_w, freq_w, filename=
   if tofile : plt.savefig(filename)
   else: plt.show()
 
+def plot_Grid(grid,Level_w,freq_w,title=None):
+  extent = (freq_w[0],freq_w[-1],(nlevel*2)-0.5,-0.5)
+  nticks = nlevel*2
+  ticks = ["%.1f"%t for t in Level_w]
+
+  # do plot
+
+  plt.imshow(grid,aspect='auto',extent=extent,interpolation='none')
+  plt.colorbar()
+  plt.yticks(np.arange(nticks+1),ticks)
+  if title : plt.title(title)
+  plt.ylim(extent[-2],extent[-1])
+  plt.xlim(extent[0],extent[1])
+  plt.grid(True)
+  plt.ylabel("Level")
+  plt.xlabel("Frequency (Hz)")
+  plt.show()
+
 def plot_FilteredResult(c,Fr,bw,level,spec = 1):
   sig = np.median(np.abs(c))/np.sqrt(np.pi/2.)
   threshold = sig*raylinv(np.array([.999,]),np.array([1,]))
@@ -97,13 +115,14 @@ if __name__=='__main__':
   nlevel= 8
   grid, Level_w, freq_w = Fast_Kurtogram(x, nlevel, Fs)
   
+  plot_Grid(grid, Level_w, freq_w, "The Test Grid")
 
   #loading and comparing with matlab:
   matlab = np.fromfile('test_data/matlab_grid.np').reshape(16,768)
   plot_GridComparison(matlab,grid,'Matlab','Python',Level_w, freq_w,comptype='rel')
 
   from SK_process import Find_wav_kurt, raylinv
-  N=16
+  N=32
   fcut=0.4
   h, g, h1, h2, h3 = get_h_parameters(N, fcut)
   M, index = get_GridMax(grid)
