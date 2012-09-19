@@ -116,4 +116,4 @@ if __name__=='__main__':
   fc = Fs * fi
   
   c,Bw,fc = Find_wav_kurt(x,h, g, h1, h2, h3,nlevel,l1,fi,Fs)
-  plot_FilteredResult(c, 0.019531,Bw*Fs,Level_w[11])
+  plot_FilteredResult(c, fi,bw,l1)
