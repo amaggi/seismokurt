@@ -72,7 +72,7 @@ def Fast_Kurtogram(x, nlevel, Fs=1, opt1=None, opt2=None):
         #~ else:
             #~ Kwav = K_wpQ(x,h,g,h1,h2,h3,nlevel,'kurt1')				# variance of the envelope magnitude
 
-        print "Kwav.shape", Kwav.shape
+        #print "Kwav.shape", Kwav.shape
         #~ print "Kwav",Kwav
         
         # keep positive values only!
@@ -326,7 +326,7 @@ def K_wpQ_filt(x,h,g,h1,h2,h3,acoeff,bcoeff,level=0):
     return c
 
 def  K_wpQ_filt_local(x,h,g,h1,h2,h3,acoeff,bcoeff,level):
-    print level, x[:10]
+    #print level, x[:10]
     a,d = DBFB(x,h,g)         # perform one analysis level into the analysis tree
     N = len(a)                       
     d = d*np.power(-1.,np.arange(1,N+1))
@@ -355,7 +355,7 @@ def  K_wpQ_filt_local(x,h,g,h1,h2,h3,acoeff,bcoeff,level):
             c = K_wpQ_filt_local(a,h,g,h1,h2,h3,acoeff,bcoeff,level-1)
         else:
             c = K_wpQ_filt_local(d,h,g,h1,h2,h3,acoeff,bcoeff,level-1)
-    print 'kurt', kurt(c,'kurt2')
+    #print 'kurt', kurt(c,'kurt2')
     #~ print 'c.shape', c.shape
     return c
 
