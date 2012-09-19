@@ -106,7 +106,7 @@ def Find_wav_kurt(x,h,g,h1,h2,h3,nlevel,Sc,Fr,Fs=1):
     c = K_wpQ_filt(x,h,g,h1,h2,h3,acoeff,bcoeff,temp_level)
     
     sig = np.median(np.abs(c))/np.sqrt(np.pi/2.)
-    threshold = sig*raylinv(np.array([.99999,]),np.array([1,]))
+    threshold = sig*raylinv(np.array([.999,]),np.array([1,]))
 
     return c,Bw,fc
 

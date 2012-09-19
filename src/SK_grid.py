@@ -23,7 +23,11 @@ def get_h_parameters(N, fc):
     h3 = h1*np.exp(2j*np.pi*np.arange(N+1)/3.)  
     return (h, g, h1, h2, h3)
 
-    
+def get_GridMax(grid):
+    index = np.argmax(grid)
+    M = np.amax(grid)
+    index = np.unravel_index(index,grid.shape)
+    return M, index
 
 def Fast_Kurtogram(x, nlevel, Fs=1, opt1=None, opt2=None):
     # Fast_Kurtogram(x,nlevel,Fs)
@@ -366,12 +370,6 @@ if __name__ == "__main__":
     v1 = loadmat("test_data/VOIE1.mat")
     x = v1['v1']
     Fs = 100
-    
-    #~ from obspy.core import read
-    #~ st = read(os.path.join(r'C:\Users\thomas\Desktop\3169','*.UCC.OT4..HHZ.D.MSEED'))
-    #~ st.merge()
-    #~ x = st[0].data
-    #~ Fs = st[0].stats.sampling_rate
 
     nlevel= 8
     grid, Level_w, freq_w = Fast_Kurtogram(x, nlevel, Fs)
@@ -380,10 +378,7 @@ if __name__ == "__main__":
     
     plt.imshow(np.sqrt(grid),aspect='auto',extent=extent,interpolation='none',origin="upper")
     
-    
-    index = np.argmax(grid)
-    M = np.amax(grid)
-    index = np.unravel_index(index,grid.shape)
+    M, index = get_GridMax(grid)
     f1 = freq_w[index[1]]
     l1 = Level_w[index[0]]
     fi = (index[1])/3./2**(nlevel+1)
@@ -391,10 +386,9 @@ if __name__ == "__main__":
     bw = Fs * 2 **-(l1) /2
     fc = Fs * fi
     print "The maximum has be reached at:"
-    print "max =", M
     print "level =",l1
     print "bw =",bw
-    print "fc =",fc
+    print "fc =",fc    
     
     plt.colorbar()
     plt.scatter([fc,],np.where(Level_w == l1)[0],marker=(5,1),c="yellow",s=100)
@@ -402,4 +396,3 @@ if __name__ == "__main__":
     plt.xlim(extent[0],extent[1])
     plt.grid()
     plt.show()
-    #~ grid.tofile('grid.np')
