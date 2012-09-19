@@ -8,6 +8,7 @@ def suite():
   suite.addTest(KurtogramTests('test_MatlabGrid'))
   suite.addTest(KurtogramTests('test_BandwidthFrequency'))
   suite.addTest(KurtogramTests('test_FindWavKurt'))
+  suite.addTest(KurtogramTests('test_Gaussian'))
   return suite
 
 #@unittest.skip('Not bothering with this test')
@@ -79,6 +80,18 @@ class KurtogramTests(unittest.TestCase):
     np.testing.assert_allclose(c.flatten(),c_exp.flatten(),atol=1e-3)
     np.testing.assert_allclose(S.flatten(),S_exp.flatten(),atol=1e-6)
  
+  def test_Gaussian(self):
+
+    from SK_plot import plot_Grid
+    g_x=np.random.normal(0.0,1.0,100000)
+    g_grid,level_w,freq_w = Fast_Kurtogram(g_x,self.nlevel, self.Fs)
+    exp_grid = np.zeros(g_grid.shape)
+    
+    self.assertAlmostEqual(np.mean(g_x),0.0,5)
+    self.assertAlmostEqual(np.std(g_x),1.0,2)
+    np.testing.assert_allclose(g_grid,exp_grid,atol=0.5)
+    #plot_Grid(g_grid,level_w,freq_w,self.nlevel,title='Gaussian')
+    
 
 if __name__ == '__main__':
 
