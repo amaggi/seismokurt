@@ -70,7 +70,7 @@ class KurtogramTests(unittest.TestCase):
 
     # get basic filter parameters
     h, g, h1, h2, h3 = get_h_parameters(N, fcut)
-    c,Bw,fc = Find_wav_kurt(self.x,h,g,h1,h2,h3,self.nlevel,lev,fi,self.Fs)
+    c,s,threshold,Bw,fc = Find_wav_kurt(self.x,h,g,h1,h2,h3,self.nlevel,lev,fi,self.Fs)
    
     S=getFTSquaredEnvelope(c)
 
