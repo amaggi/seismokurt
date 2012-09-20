@@ -17,9 +17,25 @@ def getFTSquaredEnvelope(c):
   S = np.abs(np.fft.fft( (env.ravel()-np.mean(env))*np.hanning(len(env))/len(env),nfft))
   return S
 
+#def getBwFcByLevel(nlevel,Fs, level_w,freq_w):
+
+#  print freq_w 
+#  for ilev in range(len(level_w)):
+#    l1 = level_w[ilev]
+#    bw = Fs * 2 **-(l1) /2
+#    print '**',bw
+#    for ifreq in range(len(freq_w)): 
+#      fi = (ifreq)/3./2**(nlevel+1)
+#      fi += 2.**(-2-l1)
+#      fc = Fs*fi
+#      #print fc
+
+    
+
+
 def getBandwidthAndFrequency(nlevel, Fs, level_w, freq_w, level_index, freq_index):
 
-  f1 = freq_w[freq_index]
+  #f1 = freq_w[freq_index]
   l1 = level_w[level_index]
   fi = (freq_index)/3./2**(nlevel+1)
   fi += 2.**(-2-l1)
@@ -105,10 +121,15 @@ def Find_wav_kurt(x,h,g,h1,h2,h3,nlevel,Sc,Fr,Fs=1):
     acoeff = acoeff[::-1]
     c = K_wpQ_filt(x,h,g,h1,h2,h3,acoeff,bcoeff,temp_level)
     
+    t = np.arange(len(x))/float(Fs)
+    tc = np.linspace(t[0],t[-1],len(c))
+    s=np.real(c*np.exp(2j*np.pi*fc*Fs*tc))
+
+    
     sig = np.median(np.abs(c))/np.sqrt(np.pi/2.)
     threshold = sig*raylinv(np.array([.999,]),np.array([1,]))
 
-    return c,Bw,fc
+    return c,s,threshold,Bw,fc
 
 if __name__ == "__main__":
     
