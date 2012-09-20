@@ -11,16 +11,16 @@ def nextpow2(n):
     m_i = np.ceil(m_f)
     return 2**m_i
 
-def get_h_parameters(N, fc):
-    """N : len(x)
-    Fc: some filter stuff??"""
-    h = si.firwin(N+1,fc) * np.exp(2*1j*np.pi*np.arange(N+1)*0.125)
-    n = np.arange(2,N+2)
-    g = h[(1-n)%N]*(-1)**(1-n)
-    N = np.fix((3./2.*N))
-    h1 = si.firwin(N+1,2./3*fc)*np.exp(2j*np.pi*np.arange(N+1)*0.25/3.)
-    h2 = h1*np.exp(2j*np.pi*np.arange(N+1)/6.)
-    h3 = h1*np.exp(2j*np.pi*np.arange(N+1)/3.)  
+def get_h_parameters(NFIR, fcut):
+    """NFIR : length of FIR filter
+    fcut: fraction of Nyquist for filter"""
+    h = si.firwin(NFIR+1,fcut) * np.exp(2*1j*np.pi*np.arange(NFIR+1)*0.125)
+    n = np.arange(2,NFIR+2)
+    g = h[(1-n)%NFIR]*(-1)**(1-n)
+    NFIR = np.fix((3./2.*NFIR))
+    h1 = si.firwin(NFIR+1,2./3*fcut)*np.exp(2j*np.pi*np.arange(NFIR+1)*0.25/3.)
+    h2 = h1*np.exp(2j*np.pi*np.arange(NFIR+1)/6.)
+    h3 = h1*np.exp(2j*np.pi*np.arange(NFIR+1)/3.)  
     return (h, g, h1, h2, h3)
 
 def get_GridMax(grid):
@@ -29,7 +29,7 @@ def get_GridMax(grid):
     index = np.unravel_index(index,grid.shape)
     return M, index
 
-def Fast_Kurtogram(x, nlevel, Fs=1, opt1=None, opt2=None):
+def Fast_Kurtogram(x, nlevel, Fs=1, NFIR=16, fcut=0.4, opt1=None, opt2=None):
     # Fast_Kurtogram(x,nlevel,Fs)
     # Computes the fast kurtogram of signal x up to level 'nlevel'
     # Maximum number of decomposition levels is log2(length(x)), but it is 
@@ -66,10 +66,8 @@ def Fast_Kurtogram(x, nlevel, Fs=1, opt1=None, opt2=None):
         # 1) Filterbank-based kurtogram
         ############################
         # Analytic generating filters
-        N = 16			
-        fc = .4					# a short filter is just good enough!
         
-        h, g, h1, h2, h3 = get_h_parameters(N, fc)
+        h, g, h1, h2, h3 = get_h_parameters(NFIR, fcut)
         
         if opt2 == 1:
             Kwav = K_wpQ(x,h,g,h1,h2,h3,nlevel,'kurt2')				# kurtosis of the complex envelope
