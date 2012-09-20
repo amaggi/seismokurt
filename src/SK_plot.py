@@ -59,7 +59,11 @@ def plot_Grid(grid,Level_w,freq_w,nlevel,title=None):
   plt.xlabel("Frequency (Hz)")
   plt.show()
 
-def plot_FilteredResult(c,Fr,bw,level,spec = 1):
+def plot_FilteredResult(x,Fs,c,Fr,bw,level,spec = 1):
+
+  from SK_process import raylinv
+  from SK_grid import nextpow2
+
   sig = np.median(np.abs(c))/np.sqrt(np.pi/2.)
   threshold = sig*raylinv(np.array([.999,]),np.array([1,]))
   t = np.arange(len(x))/float(Fs)
@@ -74,8 +78,8 @@ def plot_FilteredResult(c,Fr,bw,level,spec = 1):
   filt /= np.max(filt)
 
   plt.plot(t,x,'k',label='Original Signal')
-  plt.plot(tc,c,'r',label='filtered Signal')
-  plt.plot(t,filt,label='Obspy Filterded Signal')
+  plt.plot(t,filt,label='Obspy Filtered Signal')
+  plt.plot(tc,np.abs(c),'r',label='filtered Signal')
   plt.legend()
   plt.grid(True)
 
@@ -90,7 +94,7 @@ def plot_FilteredResult(c,Fr,bw,level,spec = 1):
     plt.xlabel('time [s]')
     plt.grid(True)
   if spec == 1:
-    print nextpow2(len(c))
+    #print nextpow2(len(c))
     nfft = int(nextpow2(len(c)))
     env = np.abs(c)**2
     S = np.abs(np.fft.fft( (env.ravel()-np.mean(env))*np.hanning(len(env))/len(env),nfft))
@@ -101,6 +105,7 @@ def plot_FilteredResult(c,Fr,bw,level,spec = 1):
     plt.title('Fourier transform magnitude of the squared envelope')
     plt.xlabel('frequency [Hz]')
     plt.grid(True)
+  plt.tight_layout()
   plt.show()
 
 if __name__=='__main__':
