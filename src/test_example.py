@@ -1,4 +1,4 @@
-import os, glob, unittest
+import unittest, logging
 
 def suite():
   suite = unittest.TestSuite()

@@ -44,7 +44,8 @@ class KurtogramTests(unittest.TestCase):
     fc_exp=1.953125
 
     # get the bandwith and central frequency
-    bw, fc, fi = getBandwidthAndFrequency(self.nlevel,self.Fs, self.level_w, self.freq_w, level_index, freq_index)
+    bw, fc, fi = getBandwidthAndFrequency(self.nlevel,self.Fs, self.level_w,
+            self.freq_w, level_index, freq_index)
 
     # do test
     self.assertAlmostEqual(bw,bw_exp)
@@ -66,11 +67,13 @@ class KurtogramTests(unittest.TestCase):
     S_exp = S_dict['S']
    
     # get bw and frequency (Hz)
-    bw_hz, fc_hz, fi = getBandwidthAndFrequency(self.nlevel,self.Fs, self.level_w, self.freq_w, level_index, freq_index)
+    bw_hz, fc_hz, fi = getBandwidthAndFrequency(self.nlevel, self.Fs,
+            self.level_w, self.freq_w, level_index, freq_index)
 
     # get basic filter parameters
     h, g, h1, h2, h3 = get_h_parameters(N, fcut)
-    c,s,threshold,Bw,fc = Find_wav_kurt(self.x,h,g,h1,h2,h3,self.nlevel,lev,fi,self.Fs)
+    c,s,threshold,Bw,fc = Find_wav_kurt(self.x, h, g, h1, h2, h3,
+            self.nlevel,lev, fi, self.Fs)
    
     S=getFTSquaredEnvelope(c)
 
